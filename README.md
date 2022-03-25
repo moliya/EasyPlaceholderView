@@ -1,2 +1,2 @@
 # EasyPlaceholderView
-UIScrollView category for showing loading/empty/error views as you wish
+UIView category for showing loading/empty/error views as you wish
