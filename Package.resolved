@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "EasyCompatible",
+        "repositoryURL": "https://github.com/moliya/EasyCompatible.git",
+        "state": {
+          "branch": null,
+          "revision": "190a66e60206087673068471be6b6bdffefca339",
+          "version": "1.0.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
