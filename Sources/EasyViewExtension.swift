@@ -16,14 +16,20 @@ extension UIView: EasyCompatible { }
 public extension EasyExtension where Base: UIView {
     
     // MARK: - Placeholder
-    var placeholder: EasyPlaceholder {
+    var placeholder: EasyPlaceholder? {
         get {
             if let placeholder = objc_getAssociatedObject(self.base, &EasyPlaceholderKey) as? EasyPlaceholder {
                 return placeholder
             }
-            let placeholder = EasyPlaceholder(with: self.base)
-            objc_setAssociatedObject(self.base, &EasyPlaceholderKey, placeholder, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            return placeholder
+            if let getPlaceholder = EasyPlaceholderManager.shared.defaultPlaceholder {
+                let placeholder = getPlaceholder(self.base)
+                objc_setAssociatedObject(self.base, &EasyPlaceholderKey, placeholder, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                return placeholder
+            }
+            return nil
+        }
+        set {
+            objc_setAssociatedObject(self.base, &EasyPlaceholderKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

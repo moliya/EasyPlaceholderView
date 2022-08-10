@@ -1,0 +1,6 @@
+framework module EasyPlaceholderView {
+  umbrella header "EasyPlaceholderView-umbrella.h"
+
+  export *
+  module * { export * }
+}

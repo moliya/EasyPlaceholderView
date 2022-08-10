@@ -1,0 +1,12 @@
+source 'https://cdn.cocoapods.org/'
+use_frameworks!
+platform :ios, '9.0'
+
+target 'EasyPlaceholderViewExample' do
+  pod 'EasyPlaceholderView', :path => '../'
+  pod 'EasyPlaceholderView/ObjC', :path => '../'
+  pod 'SnapKit'
+  pod 'Masonry'
+  pod 'MJRefresh'
+  pod 'FLAnimatedImage'
+end

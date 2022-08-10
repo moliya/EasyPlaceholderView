@@ -1,0 +1,46 @@
+PODS:
+  - EasyCompatible (1.0)
+  - EasyPlaceholderView (1.0.0):
+    - EasyCompatible
+    - EasyPlaceholderView/Swift (= 1.0.0)
+  - EasyPlaceholderView/ObjC (1.0.0):
+    - EasyCompatible
+    - EasyPlaceholderView/Swift
+  - EasyPlaceholderView/Swift (1.0.0):
+    - EasyCompatible
+  - FLAnimatedImage (1.0.16)
+  - Masonry (1.1.0)
+  - MJRefresh (3.7.5)
+  - SnapKit (4.2.0)
+
+DEPENDENCIES:
+  - EasyPlaceholderView (from `../`)
+  - EasyPlaceholderView/ObjC (from `../`)
+  - FLAnimatedImage
+  - Masonry
+  - MJRefresh
+  - SnapKit
+
+SPEC REPOS:
+  trunk:
+    - EasyCompatible
+    - FLAnimatedImage
+    - Masonry
+    - MJRefresh
+    - SnapKit
+
+EXTERNAL SOURCES:
+  EasyPlaceholderView:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  EasyCompatible: 571e10cf69d018b820f65cd6b99f76573313db6e
+  EasyPlaceholderView: 3ccb8497f1e25bed12d01d8ea2162e710ee92de9
+  FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
+  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+
+PODFILE CHECKSUM: c4d4447498fd3b955ba1c74a8d0f15798baa6248
+
+COCOAPODS: 1.11.3
