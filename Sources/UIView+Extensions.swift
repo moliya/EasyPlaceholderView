@@ -15,5 +15,8 @@ internal extension UIView {
         trailingAnchor.constraint(equalTo: superview.trailingAnchor).isActive = true
         topAnchor.constraint(equalTo: superview.topAnchor).isActive = true
         bottomAnchor.constraint(equalTo: superview.bottomAnchor).isActive = true
+        
+        widthAnchor.constraint(equalTo: superview.widthAnchor, constant: 0).isActive = true
+        heightAnchor.constraint(equalTo: superview.heightAnchor, constant: 0).isActive = true
     }
 }
