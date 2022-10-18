@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import EasyPlaceholderView
 
 class SwiftMultiStateDemoController: UIViewController {
     

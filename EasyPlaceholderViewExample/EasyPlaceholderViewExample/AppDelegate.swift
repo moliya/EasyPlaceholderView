@@ -16,6 +16,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+#if DEBUG
+        Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/iOSInjection.bundle")?.load()
+#endif
+
+        
         // 设置默认的占位视图
         EasyPlaceholderManager.shared.defaultPlaceholder = { view in
             let placeholder = EasyPlaceholder(with: view)
@@ -87,6 +92,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 return contentView
             }, for: .failed)
+            
+            // 状态变更
+            placeholder.setShouldChange { _, _ in
+                return true
+            }
             
             return placeholder
         }

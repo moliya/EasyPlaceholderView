@@ -67,6 +67,16 @@ public protocol EasyPlaceholderDelegate: NSObjectProtocol {
     /// - Note: 你可以在这里为按钮添加点击事件等操作
     @objc(placeholder:customizeView:forState:)
     optional func placeholder(_ placeholder: EasyPlaceholder, customize view: UIView, for state: EasyPlaceholderState)
+    
+    /// 能否改变状态
+    ///
+    /// - Parameters:
+    ///  - placeholder: 占位符对象
+    ///  - fromState: 原来的状态
+    ///  - toState: 将改变的状态
+    /// - Note: 你可以在这里控制状态的变更
+    @objc(placeholder:shouldChangeFromState:toState:)
+    optional func placeholder(_ placeholder: EasyPlaceholder, shouldChange fromState: EasyPlaceholderState, toState: EasyPlaceholderState) -> Bool
 }
 
 @objc(KFEasyPlaceholder)
@@ -79,8 +89,14 @@ open class EasyPlaceholder: NSObject {
     @objc(state)
     public var state: EasyPlaceholderState {
         set {
-            if self.internalState == .finished && !self.enableFinishedReset {
-                return
+            if let delegate = delegate {
+                if delegate.placeholder?(self, shouldChange: self.internalState, toState: newValue) == false {
+                    return
+                }
+            } else if let shouldChange = savedChange {
+                if shouldChange(self.internalState, newValue) == false {
+                    return
+                }
             }
             self.internalState = newValue
         }
@@ -92,18 +108,13 @@ open class EasyPlaceholder: NSObject {
     /// 回调代理
     public var delegate: EasyPlaceholderDelegate?
     
-    /// 完成状态下是否可被重置，默认为false
-    /// - Note: 默认情况下，当状态置为Finished时，代表页面已经正常填充了，无需再显示占位的过渡效果，所以无法再变更为其他状态
-    /// 当设为true时，则在任何情况下都可以变更状态
-    @objc(enableFinishedReset)
-    public var enableFinishedReset = false
-    
     /// 当前显示的状态视图
     private(set) var showingView: UIView?
     
     private var savedViews = [EasyPlaceholderState: (EasyPlaceholder) -> UIView?]()
     private var savedLayouts = [EasyPlaceholderState: (UIView, EasyLayoutPolicy) -> Void]()
     private var savedCustomizations = [EasyPlaceholderState: (UIView) -> Void]()
+    private var savedChange: ((EasyPlaceholderState, EasyPlaceholderState) -> Bool)?
     
     private var internalState: EasyPlaceholderState = .idle {
         didSet {
@@ -145,6 +156,15 @@ open class EasyPlaceholder: NSObject {
     @objc(setCustomizeBy:forState:)
     public func setCustomize(by closure: @escaping (_ view: UIView) -> Void, for state: EasyPlaceholderState) {
         savedCustomizations[state] = closure
+    }
+    
+    /// 设置状态的自定义改变
+    ///
+    /// - Parameters:
+    ///  - closure: 用于决定改变的闭包
+    @objc(setShouldChangeBy:)
+    public func setShouldChange(by closure: @escaping (EasyPlaceholderState, EasyPlaceholderState) -> Bool) {
+        savedChange = closure
     }
     
     /// 显示Loading状态

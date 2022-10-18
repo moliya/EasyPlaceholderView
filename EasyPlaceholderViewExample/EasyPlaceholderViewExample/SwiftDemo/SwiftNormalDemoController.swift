@@ -16,6 +16,13 @@ class SwiftNormalDemoController: UIViewController {
         navigationItem.title = "常用示例"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(changeState))
         
+        view.easy.placeholder?.setShouldChange(by: { fromState, toState in
+            if fromState == .finished {
+                return false
+            }
+            return true
+        })
+        
         // 添加空白页
         view.easy.placeholder?.setView(by: { _ in
             let contentView = UIView()
