@@ -32,7 +32,30 @@ public enum EasyPlaceholderLayoutPolicy: Int {
     case custom
 }
 
-fileprivate class EasyCoverView: UIView {}
+fileprivate class EasyCoverView: UIView {
+    var lastInsets = UIEdgeInsets.zero
+    var forcedToCover = true
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        if !forcedToCover {
+            return
+        }
+        if let scrollView = superview as? UIScrollView {
+            var insets = scrollView.contentInset
+            if #available(iOS 11.0, *) {
+                insets = scrollView.adjustedContentInset
+            }
+            if insets == lastInsets {
+                return
+            }
+            lastInsets = insets
+            edgeInContainer(UIEdgeInsets(top: -insets.top, left: -insets.left, bottom: 0, right: 0))
+        }
+    }
+}
+
 public typealias EasyLayoutPolicy = (EasyPlaceholderLayoutPolicy) -> Void
 
 @objc(KFEasyPlaceholderDelegate)
@@ -106,7 +129,16 @@ open class EasyPlaceholder: NSObject {
     }
     
     /// 回调代理
+    @objc(delegate)
     public var delegate: EasyPlaceholderDelegate?
+    
+    /// 是否强制覆盖ScrollView
+    @objc(forcedToCoverScrollView)
+    public var forcedToCoverScrollView = true
+    
+    /// 是否可以滚动
+    @objc(allowScroll)
+    public var allowScroll = true
     
     /// 当前显示的状态视图
     private(set) var showingView: UIView?
@@ -210,7 +242,11 @@ open class EasyPlaceholder: NSObject {
         getLayoutPolicy(with: view, for: state) { policy in
             if view.superview == nil {
                 let coverView = EasyCoverView()
+                coverView.forcedToCover = forcedToCoverScrollView
                 coverView.addGestureRecognizer(UITapGestureRecognizer())
+                if !allowScroll {
+                    coverView.addGestureRecognizer(UIPanGestureRecognizer())
+                }
                 superview.addSubview(coverView)
                 coverView.edgeInContainer()
                 coverView.addSubview(view)
