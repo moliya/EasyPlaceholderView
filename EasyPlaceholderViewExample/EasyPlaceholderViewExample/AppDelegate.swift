@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 设置默认的占位视图
         EasyPlaceholderManager.shared.defaultPlaceholder = { view in
             let placeholder = EasyPlaceholder(with: view)
-            placeholder.allowScroll = false
+            placeholder.isScrollEnabled = false
             // 加载状态视图
             placeholder.setView(by: { _ in
                 let contentView = UIView()

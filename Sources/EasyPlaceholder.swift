@@ -112,6 +112,9 @@ open class EasyPlaceholder: NSObject {
     @objc(state)
     public var state: EasyPlaceholderState {
         set {
+            if !isEnabled {
+                return
+            }
             if let delegate = delegate {
                 if delegate.placeholder?(self, shouldChange: self.internalState, toState: newValue) == false {
                     return
@@ -132,13 +135,17 @@ open class EasyPlaceholder: NSObject {
     @objc(delegate)
     public var delegate: EasyPlaceholderDelegate?
     
+    /// 是否启用
+    @objc(enabled)
+    public var isEnabled = true
+    
     /// 是否强制覆盖ScrollView
     @objc(forcedToCoverScrollView)
     public var forcedToCoverScrollView = true
     
     /// 是否可以滚动
-    @objc(allowScroll)
-    public var allowScroll = true
+    @objc(scrollEnabled)
+    public var isScrollEnabled = true
     
     /// 当前显示的状态视图
     private(set) var showingView: UIView?
@@ -244,7 +251,7 @@ open class EasyPlaceholder: NSObject {
                 let coverView = EasyCoverView()
                 coverView.forcedToCover = forcedToCoverScrollView
                 coverView.addGestureRecognizer(UITapGestureRecognizer())
-                if !allowScroll {
+                if !isScrollEnabled {
                     coverView.addGestureRecognizer(UIPanGestureRecognizer())
                 }
                 superview.addSubview(coverView)
