@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name          = "EasyPlaceholderView"
-  s.version       = "1.0.2"
+  s.version       = "1.0.3"
   s.summary       = "UIView category for showing loading/empty/error views as you wish"
   s.homepage      = "https://github.com/moliya/EasyPlaceholderView"
   s.license       = "MIT"

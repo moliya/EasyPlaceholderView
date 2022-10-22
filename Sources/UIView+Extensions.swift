@@ -8,38 +8,75 @@
 import UIKit
 
 internal extension UIView {
-    func edgeInContainer(_ insets: UIEdgeInsets = .zero) {
+    func removeConstraint(for identifier: String) {
+        guard let superview = self.superview else { return }
+        for constraint in superview.constraints {
+            if identifier == constraint.identifier {
+                if let item = constraint.firstItem as? UIView, item == self {
+                    constraint.isActive = false
+                    removeConstraint(constraint)
+                }
+            }
+        }
+    }
+    
+    func leftToContainer(_ offset: CGFloat = 0) {
         guard let superview = self.superview else { return }
         translatesAutoresizingMaskIntoConstraints = false
         
-        for constraint in superview.constraints {
-            guard let identifier = constraint.identifier, identifier.hasPrefix("EasyPlaceholderView") else {
-                continue
-            }
-            if let item = constraint.firstItem as? UIView, item == self {
-                constraint.isActive = false
-                self.removeConstraint(constraint)
-            }
-        }
+        removeConstraint(for: "EasyPlaceholderLeft")
+        let constraint = leadingAnchor.constraint(equalTo: superview.leadingAnchor, constant: offset)
+        constraint.identifier = "EasyPlaceholderLeft"
+        constraint.isActive = true
+    }
+    
+    func rightToContainer(_ offset: CGFloat = 0) {
+        guard let superview = self.superview else { return }
+        translatesAutoresizingMaskIntoConstraints = false
         
-        let leading = leadingAnchor.constraint(equalTo: superview.leadingAnchor, constant: insets.left)
-        leading.identifier = "EasyPlaceholderViewLeading"
+        removeConstraint(for: "EasyPlaceholderRight")
+        let constraint = trailingAnchor.constraint(equalTo: superview.trailingAnchor, constant: offset)
+        constraint.identifier = "EasyPlaceholderRight"
+        constraint.isActive = true
+    }
+    
+    func topToContainer(_ offset: CGFloat = 0) {
+        guard let superview = self.superview else { return }
+        translatesAutoresizingMaskIntoConstraints = false
         
-        let trailing = trailingAnchor.constraint(equalTo: superview.trailingAnchor, constant: -insets.right)
-        trailing.identifier = "EasyPlaceholderViewTrailing"
+        removeConstraint(for: "EasyPlaceholderTop")
+        let constraint = topAnchor.constraint(equalTo: superview.topAnchor, constant: offset)
+        constraint.identifier = "EasyPlaceholderTop"
+        constraint.isActive = true
+    }
+    
+    func bottomToContainer(_ offset: CGFloat = 0) {
+        guard let superview = self.superview else { return }
+        translatesAutoresizingMaskIntoConstraints = false
         
-        let top = topAnchor.constraint(equalTo: superview.topAnchor, constant: insets.top)
-        top.identifier = "EasyPlaceholderViewTop"
+        removeConstraint(for: "EasyPlaceholderBottom")
+        let constraint = bottomAnchor.constraint(equalTo: superview.bottomAnchor, constant: offset)
+        constraint.identifier = "EasyPlaceholderBottom"
+        constraint.isActive = true
+    }
+    
+    func widthToContainer() {
+        guard let superview = self.superview else { return }
+        translatesAutoresizingMaskIntoConstraints = false
         
-        let bottom = bottomAnchor.constraint(equalTo: superview.bottomAnchor, constant: -insets.bottom)
-        bottom.identifier = "EasyPlaceholderViewBottom"
+        removeConstraint(for: "EasyPlaceholderWidth")
+        let constraint = widthAnchor.constraint(equalTo: superview.widthAnchor, constant: 0)
+        constraint.identifier = "EasyPlaceholderWidth"
+        constraint.isActive = true
+    }
+    
+    func heightToContainer() {
+        guard let superview = self.superview else { return }
+        translatesAutoresizingMaskIntoConstraints = false
         
-        let width = widthAnchor.constraint(equalTo: superview.widthAnchor, constant: 0)
-        width.identifier = "EasyPlaceholderViewWidth"
-        
-        let height = heightAnchor.constraint(equalTo: superview.heightAnchor, constant: 0)
-        height.identifier = "EasyPlaceholderViewHeight"
-        
-        NSLayoutConstraint.activate([leading, trailing, top, bottom, width, height])
+        removeConstraint(for: "EasyPlaceholderHeight")
+        let constraint = heightAnchor.constraint(equalTo: superview.heightAnchor, constant: 0)
+        constraint.identifier = "EasyPlaceholderHeight"
+        constraint.isActive = true
     }
 }

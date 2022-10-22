@@ -34,14 +34,15 @@ public enum EasyPlaceholderLayoutPolicy: Int {
 
 fileprivate class EasyCoverView: UIView {
     var lastInsets = UIEdgeInsets.zero
-    var forcedToCover = true
+    var shouldAdjustCenter = true
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        if !forcedToCover {
+        if !shouldAdjustCenter {
             return
         }
+        
         if let scrollView = superview as? UIScrollView {
             var insets = scrollView.contentInset
             if #available(iOS 11.0, *) {
@@ -51,7 +52,8 @@ fileprivate class EasyCoverView: UIView {
                 return
             }
             lastInsets = insets
-            edgeInContainer(UIEdgeInsets(top: -insets.top, left: -insets.left, bottom: 0, right: 0))
+            leftToContainer(-insets.left)
+            topToContainer(-insets.top)
         }
     }
 }
@@ -139,13 +141,13 @@ open class EasyPlaceholder: NSObject {
     @objc(enabled)
     public var isEnabled = true
     
-    /// 是否强制覆盖ScrollView
-    @objc(forcedToCoverScrollView)
-    public var forcedToCoverScrollView = true
-    
     /// 是否可以滚动
     @objc(scrollEnabled)
-    public var isScrollEnabled = true
+    public var isScrollEnabled = false
+    
+    /// 是否自动调整中心位置
+    @objc(shouldAdjustCenter)
+    public var shouldAdjustCenter = true
     
     /// 当前显示的状态视图
     private(set) var showingView: UIView?
@@ -249,18 +251,24 @@ open class EasyPlaceholder: NSObject {
         getLayoutPolicy(with: view, for: state) { policy in
             if view.superview == nil {
                 let coverView = EasyCoverView()
-                coverView.forcedToCover = forcedToCoverScrollView
+                coverView.shouldAdjustCenter = shouldAdjustCenter
                 coverView.addGestureRecognizer(UITapGestureRecognizer())
                 if !isScrollEnabled {
                     coverView.addGestureRecognizer(UIPanGestureRecognizer())
                 }
                 superview.addSubview(coverView)
-                coverView.edgeInContainer()
+                coverView.topToContainer()
+                coverView.leftToContainer()
+                coverView.widthToContainer()
+                coverView.heightToContainer()
                 coverView.addSubview(view)
             }
             if policy == .default {
                 // 使用默认布局
-                view.edgeInContainer()
+                view.topToContainer()
+                view.leftToContainer()
+                view.widthToContainer()
+                view.heightToContainer()
             }
             if let coverView = showingView?.superview as? EasyCoverView {
                 coverView.removeFromSuperview()
