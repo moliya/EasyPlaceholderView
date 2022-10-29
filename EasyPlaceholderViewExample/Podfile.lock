@@ -1,12 +1,12 @@
 PODS:
   - EasyCompatible (1.0)
-  - EasyPlaceholderView (1.0.0):
+  - EasyPlaceholderView (1.0.3):
     - EasyCompatible
-    - EasyPlaceholderView/Swift (= 1.0.0)
-  - EasyPlaceholderView/ObjC (1.0.0):
+    - EasyPlaceholderView/Swift (= 1.0.3)
+  - EasyPlaceholderView/ObjC (1.0.3):
     - EasyCompatible
     - EasyPlaceholderView/Swift
-  - EasyPlaceholderView/Swift (1.0.0):
+  - EasyPlaceholderView/Swift (1.0.3):
     - EasyCompatible
   - FLAnimatedImage (1.0.16)
   - Masonry (1.1.0)
@@ -35,7 +35,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   EasyCompatible: 571e10cf69d018b820f65cd6b99f76573313db6e
-  EasyPlaceholderView: 3ccb8497f1e25bed12d01d8ea2162e710ee92de9
+  EasyPlaceholderView: 07d36bf2c7891950d9586e51cd253f8885b9073f
   FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961

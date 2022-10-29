@@ -22,7 +22,7 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(changeState)];
     
     // 添加空白页
-    [self.view.easy_placeholder setViewBy:^UIView * _Nullable(KFEasyPlaceholder * _Nonnull p) {
+    [self.view.easy_placeholder setViewBy:^UIView * _Nullable(EasyPlaceholder * _Nonnull p) {
         UIView *contentView = [[UIView alloc] init];
         contentView.backgroundColor = [UIColor colorWithHex:0xf8f8f8];
         
@@ -48,7 +48,7 @@
         }];
         
         return contentView;
-    } forState:KFEasyPlaceholderStateEmpty];
+    } forState:EasyPlaceholderStateEmpty];
     
     // 添加失败状态的自定义配置
     __weak typeof(self) weakSelf = self;
@@ -60,7 +60,7 @@
                 [button addTarget:weakSelf action:@selector(retryAction) forControlEvents:UIControlEventTouchUpInside];
             }
         }
-    } forState:KFEasyPlaceholderStateFailed];
+    } forState:EasyPlaceholderStateFailed];
     
     // 最终展示的内容
     UIImageView *iconView = [[UIImageView alloc] init];

@@ -21,8 +21,8 @@ public extension EasyExtension where Base: UIView {
             if let placeholder = objc_getAssociatedObject(self.base, &EasyPlaceholderKey) as? EasyPlaceholder {
                 return placeholder
             }
-            if let getPlaceholder = EasyPlaceholderManager.shared.defaultPlaceholder {
-                let placeholder = getPlaceholder(self.base)
+            if let generator = EasyPlaceholderManager.shared.generator,
+               let placeholder = generator.defaultPlaceholder?(for: self.base) {
                 objc_setAssociatedObject(self.base, &EasyPlaceholderKey, placeholder, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
                 return placeholder
             }

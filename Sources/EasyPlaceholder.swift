@@ -9,7 +9,7 @@
 import UIKit
 
 /// 占位状态
-@objc(KFEasyPlaceholderState)
+@objc(EasyPlaceholderState)
 public enum EasyPlaceholderState: Int, Hashable {
     /// 闲置状态，默认的初始状态，一般不用于展示
     case idle = 0
@@ -24,7 +24,7 @@ public enum EasyPlaceholderState: Int, Hashable {
 }
 
 /// 布局策略
-@objc(KFEasyPlaceholderLayoutPolicy)
+@objc(EasyPlaceholderLayoutPolicy)
 public enum EasyPlaceholderLayoutPolicy: Int {
     /// 默认策略
     case `default` = 0
@@ -32,35 +32,11 @@ public enum EasyPlaceholderLayoutPolicy: Int {
     case custom
 }
 
-fileprivate class EasyCoverView: UIView {
-    var lastInsets = UIEdgeInsets.zero
-    var shouldAdjustCenter = true
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        if !shouldAdjustCenter {
-            return
-        }
-        
-        if let scrollView = superview as? UIScrollView {
-            var insets = scrollView.contentInset
-            if #available(iOS 11.0, *) {
-                insets = scrollView.adjustedContentInset
-            }
-            if insets == lastInsets {
-                return
-            }
-            lastInsets = insets
-            leftToContainer(-insets.left)
-            topToContainer(-insets.top)
-        }
-    }
-}
+fileprivate class EasyCoverView: UIView {}
 
 public typealias EasyLayoutPolicy = (EasyPlaceholderLayoutPolicy) -> Void
 
-@objc(KFEasyPlaceholderDelegate)
+@objc(EasyPlaceholderDelegate)
 public protocol EasyPlaceholderDelegate: NSObjectProtocol {
     /// 为指定状态提供一个展示视图
     ///
@@ -68,7 +44,7 @@ public protocol EasyPlaceholderDelegate: NSObjectProtocol {
     ///  - placeholder: 占位符对象
     ///  - state: 指定的状态
     /// - Returns: 展示的视图，如果是nil则不展示
-    @objc(placeholder:viewForState:)
+    @objc(easy_placeholder:viewForState:)
     optional func placeholder(_ placeholder: EasyPlaceholder, viewFor state: EasyPlaceholderState) -> UIView?
     
     /// 决定布局的方式
@@ -76,22 +52,32 @@ public protocol EasyPlaceholderDelegate: NSObjectProtocol {
     /// - Parameters:
     ///  - placeholder: 占位符对象
     ///  - policy: 布局策略回调
-    ///  - view: 需要布局的视图
+    ///  - view: 展示视图
     ///  - state: 指定的状态
     /// - Note: 默认的布局方式是使用Autolayout铺满父视图
     ///  如果使用EasyPlaceholderLayoutPolicy.custom，你需要自行使用Autolayout或Frame来设置视图的布局
-    @objc(placeholder:decideLayoutPolicy:withView:forState:)
+    @objc(easy_placeholder:decideLayoutPolicy:withView:forState:)
     optional func placeholder(_ placeholder: EasyPlaceholder, decideLayout policy: EasyLayoutPolicy, with view: UIView, for state: EasyPlaceholderState)
     
     /// 对指定状态进行自定义配置
     ///
     /// - Parameters:
     ///  - placeholder: 占位符对象
-    ///  - view: 需要布局的视图
+    ///  - view: 展示视图
     ///  - state: 指定的状态
     /// - Note: 你可以在这里为按钮添加点击事件等操作
-    @objc(placeholder:customizeView:forState:)
+    @objc(easy_placeholder:customizeView:forState:)
     optional func placeholder(_ placeholder: EasyPlaceholder, customize view: UIView, for state: EasyPlaceholderState)
+    
+    /// 决定指定状态下的ScrollView是否可以滚动
+    ///
+    /// - Parameters:
+    ///  - placeholder: 占位符对象
+    ///  - view: 展示视图
+    ///  - state: 指定的状态
+    /// - Returns: 是否可以滚动
+    @objc(easy_placeholder:scrollEnabledView:forState:)
+    optional func placeholder(_ placeholder: EasyPlaceholder, scrollEnabled view: UIView, for state: EasyPlaceholderState) -> Bool
     
     /// 能否改变状态
     ///
@@ -100,11 +86,11 @@ public protocol EasyPlaceholderDelegate: NSObjectProtocol {
     ///  - fromState: 原来的状态
     ///  - toState: 将改变的状态
     /// - Note: 你可以在这里控制状态的变更
-    @objc(placeholder:shouldChangeFromState:toState:)
+    @objc(easy_placeholder:shouldChangeFromState:toState:)
     optional func placeholder(_ placeholder: EasyPlaceholder, shouldChange fromState: EasyPlaceholderState, toState: EasyPlaceholderState) -> Bool
 }
 
-@objc(KFEasyPlaceholder)
+@objc(EasyPlaceholder)
 open class EasyPlaceholder: NSObject {
     
     /// 目标视图
@@ -135,7 +121,7 @@ open class EasyPlaceholder: NSObject {
     
     /// 回调代理
     @objc(delegate)
-    public var delegate: EasyPlaceholderDelegate?
+    public weak var delegate: EasyPlaceholderDelegate?
     
     /// 是否启用
     @objc(enabled)
@@ -143,18 +129,19 @@ open class EasyPlaceholder: NSObject {
     
     /// 是否可以滚动
     @objc(scrollEnabled)
-    public var isScrollEnabled = false
+    public var isScrollEnabled = true
     
     /// 是否自动调整中心位置
     @objc(shouldAdjustCenter)
     public var shouldAdjustCenter = true
     
     /// 当前显示的状态视图
-    private(set) var showingView: UIView?
+    private(set) weak var showingView: UIView?
     
     private var savedViews = [EasyPlaceholderState: (EasyPlaceholder) -> UIView?]()
     private var savedLayouts = [EasyPlaceholderState: (UIView, EasyLayoutPolicy) -> Void]()
     private var savedCustomizations = [EasyPlaceholderState: (UIView) -> Void]()
+    private var savedScrollEnabled = [EasyPlaceholderState: (UIView) -> Bool]()
     private var savedChange: ((EasyPlaceholderState, EasyPlaceholderState) -> Bool)?
     
     private var internalState: EasyPlaceholderState = .idle {
@@ -163,10 +150,26 @@ open class EasyPlaceholder: NSObject {
         }
     }
     
+    private var ob: NSKeyValueObservation?
+    
     // MARK: - Public
     @objc(initWithView:)
     public init(with view: UIView?) {
+        super.init()
+        
         self.view = view
+        guard let scrollView = view as? UIScrollView else {
+            return
+        }
+        if #available(iOS 11.0, *) {
+            ob = scrollView.observe(\.safeAreaInsets, options: [.initial, .old, .new], changeHandler: {[unowned self] view, _ in
+                self.centerAdjust(scrollView: view)
+            })
+        } else {
+            ob = scrollView.observe(\.contentOffset, options: [.initial, .old, .new], changeHandler: {[unowned self] view, _ in
+                self.centerAdjust(scrollView: view)
+            })
+        }
     }
     
     /// 为指定状态设置展示视图
@@ -197,6 +200,16 @@ open class EasyPlaceholder: NSObject {
     @objc(setCustomizeBy:forState:)
     public func setCustomize(by closure: @escaping (_ view: UIView) -> Void, for state: EasyPlaceholderState) {
         savedCustomizations[state] = closure
+    }
+    
+    /// 设置指定状态下的ScrollView是否可以滚动
+    ///
+    /// - Parameters:
+    ///  - closure: 用于设置滚动的闭包
+    ///  - state: 指定的状态
+    @objc(setScrollEnabledBy:forState:)
+    public func setScrollEnabled(by closure: @escaping (_ view: UIView) -> Bool, for state: EasyPlaceholderState) {
+        savedScrollEnabled[state] = closure
     }
     
     /// 设置状态的自定义改变
@@ -251,11 +264,7 @@ open class EasyPlaceholder: NSObject {
         getLayoutPolicy(with: view, for: state) { policy in
             if view.superview == nil {
                 let coverView = EasyCoverView()
-                coverView.shouldAdjustCenter = shouldAdjustCenter
                 coverView.addGestureRecognizer(UITapGestureRecognizer())
-                if !isScrollEnabled {
-                    coverView.addGestureRecognizer(UIPanGestureRecognizer())
-                }
                 superview.addSubview(coverView)
                 coverView.topToContainer()
                 coverView.leftToContainer()
@@ -277,7 +286,12 @@ open class EasyPlaceholder: NSObject {
             }
             showingView = view
             
-            // 3. 自定义配置
+            // 3. 滚动
+            if let scrollView = superview as? UIScrollView {
+                scrollView.panGestureRecognizer.isEnabled = getScrollEnabled(with: view, for: state)
+            }
+            
+            // 4. 自定义配置
             useCustomization(with: view, for: state)
         }
     }
@@ -309,5 +323,41 @@ open class EasyPlaceholder: NSObject {
         if let closure = savedCustomizations[state] {
             closure(view)
         }
+    }
+    
+    private func getScrollEnabled(with view: UIView, for state: EasyPlaceholderState) -> Bool {
+        if let enabled = delegate?.placeholder?(self, scrollEnabled: view, for: state) {
+            return enabled
+        }
+        if let closure = savedScrollEnabled[state] {
+            return closure(view)
+        }
+        return isScrollEnabled
+    }
+    
+    private func centerAdjust(scrollView: UIScrollView) {
+        if !shouldAdjustCenter {
+            return
+        }
+        var size = scrollView.bounds.size
+        
+        if #available(iOS 11.0, *) {
+            // 并不是很好的解决方式，待优化
+            let adjustedInset = scrollView.adjustedContentInset
+            let safeInset = scrollView.safeAreaInsets
+            let left = min(adjustedInset.left, safeInset.left)
+            let right = min(adjustedInset.right, safeInset.right)
+            let top = min(adjustedInset.top, safeInset.top)
+            let bottom = min(adjustedInset.bottom, safeInset.bottom)
+            size.width = size.width - left - right
+            size.height = size.height - top - bottom
+        }
+        let coverView = showingView?.superview
+        let showSize = coverView?.bounds.size
+        if showSize == size || size.width <= 0 || size.height <= 0 {
+            return
+        }
+        coverView?.widthEqual(to: size.width)
+        coverView?.heightEqual(to: size.height)
     }
 }

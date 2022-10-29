@@ -7,14 +7,22 @@
 
 import UIKit
 
-@objc(KFEasyPlaceholderManager)
+@objc(EasyPlaceholderGenerator)
+public protocol EasyPlaceholderGenerator: NSObjectProtocol {
+    
+    @objc(easy_defaultPlaceholderForView:)
+    optional func defaultPlaceholder(for view: UIView) -> EasyPlaceholder
+    
+}
+
+@objc(EasyPlaceholderManager)
 open class EasyPlaceholderManager: NSObject {
+    
+    @objc(generator)
+    public weak var generator: EasyPlaceholderGenerator?
     
     @objc
     public static let shared = EasyPlaceholderManager()
     private override init() {}
     
-    /// 默认的Placeholder配置
-    @objc
-    public var defaultPlaceholder: ((UIView) -> EasyPlaceholder)?
 }
